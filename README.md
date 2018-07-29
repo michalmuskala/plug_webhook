@@ -49,6 +49,7 @@ Where `:parser_opts` would be the options, you'd usually pass to `Plug.Parsers`.
 It's important to add the `PlugWebhook` before parsers themselves.
 For example, in a Phoenix application, this could look as (in the endpoint module):
 
+```elixir
 parser_opts = [
   parsers: [:urlencoded, :multipart, :json],
   pass: ["*/*"],
@@ -61,6 +62,7 @@ plug PlugWebhook,
   handler: MyWebhookHandler
 
 plug Plug.Parsers, parser_opts
+```
 
 ## Installation
 
