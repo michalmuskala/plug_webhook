@@ -12,7 +12,6 @@ defmodule PlugWebhook.MixProject do
       deps: deps(),
       description: description(),
       package: package(),
-      preferred_cli_env: [docs: :docs],
       docs: docs()
     ]
   end
@@ -26,7 +25,7 @@ defmodule PlugWebhook.MixProject do
   defp deps do
     [
       {:plug, "~> 1.4"},
-      {:ex_doc, "~> 0.19", only: :docs}
+      {:ex_doc, "~> 0.19", only: :dev}
     ]
   end
 
