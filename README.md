@@ -31,10 +31,19 @@ defmodule MyWebhookHandler do
     end
   end
 
-  def call(conn, opts) do
-    json_body = conn.body_params
-    IO.inspect({:got_json, json_body})
-    send_resp(conn, 200, "")
+  def call(conn, _opts) do
+    [event_type] = get_req_header(conn, "x-github-event")
+    handle(event_type, conn, conn.body_params)
+  end
+
+  defp handle("issues", conn, %{"action" => "opened"} = payload) do
+    # handle opened issue
+    send_resp(conn, 200, "ok")
+  end
+
+  defp handle(_, conn, _) do
+    # pass through other events
+    send_resp(conn, 200, "ok")
   end
 end
 ```

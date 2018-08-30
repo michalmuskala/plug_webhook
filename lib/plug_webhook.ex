@@ -30,10 +30,19 @@ defmodule PlugWebhook do
           end
         end
 
-        def call(conn, opts) do
-          json_body = conn.body_params
-          IO.inspect({:got_json, json_body})
-          send_resp(conn, 200, "")
+        def call(conn, _opts) do
+          [event_type] = get_req_header(conn, "x-github-event")
+          handle(event_type, conn, conn.body_params)
+        end
+
+        defp handle("issues", conn, %{"action" => "opened"} = payload) do
+          # handle opened issue
+          send_resp(conn, 200, "ok")
+        end
+
+        defp handle(_, conn, _) do
+          # pass through other events
+          send_resp(conn, 200, "ok")
         end
       end
 
@@ -62,10 +71,17 @@ defmodule PlugWebhook do
 
   @type opts :: term()
 
-  @callback verify_signature(Plug.Conn.t(), body :: String.t(), opts()) :: Plug.Conn.t()
+  @doc """
+  Callback responsible for verifying the request signature.
+
+  It should behave as a plug in every respect, in particular, it must
+  return an optionally modified `conn` struct.
+  """
+  @callback verify_signature(conn :: Plug.Conn.t(), body :: String.t(), opts()) :: Plug.Conn.t()
 
   @behaviour Plug
 
+  @impl true
   def init(opts) do
     handler = Keyword.fetch!(opts, :handler)
     parser_opts = Keyword.fetch!(opts, :parser_opts)
@@ -76,6 +92,7 @@ defmodule PlugWebhook do
     {split(at), Plug.Parsers.init(parser_opts), handler, handler_opts}
   end
 
+  @impl true
   def call(%Plug.Conn{path_info: path, script_name: script} = conn, opts) do
     {at, parser_opts, handler, handler_opts} = opts
 
